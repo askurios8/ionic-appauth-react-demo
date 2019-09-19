@@ -2,7 +2,12 @@ import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonPage, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
+
 import Home from './pages/Home';
+import Landing from './pages/Landing';
+import AuthCallback from './pages/implicit/auth-callback';
+import EndSession from './pages/implicit/end-session';
+import AppAuthProvider from './components/ion-appauth/ion-appauth'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -23,17 +28,26 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const App: React.FunctionComponent = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonPage>
-        <IonRouterOutlet>
-          <Route path="/home" component={Home} exact={true} />
-          <Route exact path="/" render={() => <Redirect to="/home" />} />
-        </IonRouterOutlet>
-      </IonPage>
-    </IonReactRouter>
-  </IonApp>
-);
+
+const App: React.FunctionComponent = () => 
+{
+  return ( 
+    <IonApp>
+      <IonReactRouter>
+        <IonPage>
+          <IonRouterOutlet>
+            <AppAuthProvider>
+              <Route exact path="/implicit/authcallback" component={AuthCallback} />
+              <Route exact path="/implicit/endsession" component={EndSession} />
+              <Route path="/landing" component={Landing} exact={true} />
+              <Route path="/home" component={Home} exact={true} />
+              <Route exact path="/" render={() => <Redirect to="/home" />} />
+            </AppAuthProvider>
+          </IonRouterOutlet>
+        </IonPage>
+      </IonReactRouter>
+    </IonApp>
+  );
+}
 
 export default App;

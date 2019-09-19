@@ -1,26 +1,31 @@
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 import React from 'react';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonPage } from '@ionic/react';
 
-const Home: React.FunctionComponent = () => {
+import { ActionCard, UserInfoCard, useAppAuth } from '../components'
+
+const Home : React.FunctionComponent = () => {
+
+  const { authAction, appAuth, user } = useAppAuth(); 
+
+  const signOut = (e : any) => {
+    e.preventDefault();
+    appAuth.signOut();  
+  }
+
   return (
     <>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Ionic Blank</IonTitle>
+          <IonTitle>Logged In</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
-        The world is your oyster.
-        <p>
-          If you get lost, the{' '}
-          <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/">
-            docs
-          </a>{' '}
-          will be your guide.
-        </p>
+      <IonContent>
+        <IonButton onClick={(e) => signOut(e)}>Sign Out</IonButton>
+        <ActionCard action={authAction}></ActionCard>
+        <UserInfoCard userInfo={user}></UserInfoCard> 
       </IonContent>
     </>
-  );
+  ); 
 };
 
 export default Home;

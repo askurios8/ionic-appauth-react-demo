@@ -1,0 +1,7 @@
+{
+  "appId": "com.appauth.demo",
+  "appName": "CapReactDemo",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build"
+}
