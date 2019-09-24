@@ -7,7 +7,8 @@ import Home from './pages/Home';
 import Landing from './pages/Landing';
 import AuthCallback from './pages/implicit/auth-callback';
 import EndSession from './pages/implicit/end-session';
-import AppAuthProvider from './components/ion-appauth/ion-appauth'
+import AppAuthProvider from './components/ion-appauth/ion-appauth';
+import { PrivateRoute } from './components';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,7 +29,6 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-
 const App: React.FunctionComponent = () => 
 {
   return ( 
@@ -40,7 +40,7 @@ const App: React.FunctionComponent = () =>
               <Route exact path="/implicit/authcallback" component={AuthCallback} />
               <Route exact path="/implicit/endsession" component={EndSession} />
               <Route path="/landing" component={Landing} exact={true} />
-              <Route path="/home" component={Home} exact={true} />
+              <PrivateRoute path="/home" component={Home} exact={true} />
               <Route exact path="/" render={() => <Redirect to="/home" />} />
             </AppAuthProvider>
           </IonRouterOutlet>

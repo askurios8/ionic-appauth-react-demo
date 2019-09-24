@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from 'axios';
 export class AxiosRequestor extends Requestor  {
 
     
-    public async xhr<T>(settings: XhrSettings): Promise<T> {
+    public async xhr<T>(settings: XhrSettings){
         let instance = axios.create({
             timeout: 1000,
             headers: settings.headers

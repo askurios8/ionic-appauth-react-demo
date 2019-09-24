@@ -1,5 +1,5 @@
 import React from 'react';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonPage } from '@ionic/react';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton } from '@ionic/react';
 
 import { ActionCard, UserInfoCard, useAppAuth } from '../components'
 

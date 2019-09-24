@@ -1,29 +1,37 @@
 import React from 'react';
-import { Route, Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
+import { useAppAuth } from '..';
 
-import { useAppAuth } from './ion-appauth';
+export const PrivateRoute = ({component , ...rest} : any) => {
 
-type RouteComponent = React.StatelessComponent<RouteComponentProps<{}>> | React.ComponentClass<any>
+    const { isAuthenticated } = useAppAuth();     
+    
+    const routeComponent = (props: any) => (
+        (isAuthenticated)
+            ? React.createElement(component, props)
+            : <Redirect to={{pathname: '/landing'}}/>
+    );
+    return <Route {...rest} render={routeComponent}/>;
+}
 
-export const PrivateRoute: React.StatelessComponent<RouteProps> = ({component, ...rest}) => {
-    const { isAuthenticated } = useAppAuth(); 
 
-    const renderFn = (Component?: RouteComponent) => {
-        return (props: RouteProps) => {
-            if (!Component) {
-                return null;
-            }
-            if (isAuthenticated) {
-                return <React.Component {...props} />;
-            }
-            const redirectProps = {
-                to: {
-                    pathname: "/landing"
-                },
-            };
-            return <Redirect {...redirectProps} />;
-        };
-    }
-  
-    return <Route {...rest} render={renderFn(component)} />
-  }
+
+
+
+
+//     const { appAuth } = useAppAuth(); 
+//     const [authComplete, setAuthComplete] = useState(false);
+
+//     appAuth.startUpAsync().then(() => setAuthComplete(true));
+
+//     const renderFn = (Component?: RouteComponent) => {
+//         return (props: RouteProps) => {
+//             if (!Component) {
+//                 return null;
+//             }
+//             return <React.Component {...props} />;
+//         };
+//     };
+
+//     return ((authComplete) ? <Route {...rest} render={renderFn(component)} /> : <div>No Auth</div>)
+// }

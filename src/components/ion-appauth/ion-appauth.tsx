@@ -1,53 +1,56 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { IAuthAction, AuthActionBuilder, AuthActions, NullIonicAuthObject, IIonicAuth } from 'ionic-appauth';
+import React, { createContext, useContext, useState, ReactNode, FC } from 'react';
+import { IAuthAction, AuthActionBuilder, AuthActions } from 'ionic-appauth';
 
 import { IonicAppAuth } from '../../utils/app-auth';
 import { IUserInfo } from '../../models/user-info';
 
 interface IAuthContextValues {
-    appAuth: IIonicAuth,
+    appAuth: IonicAppAuth,
     isAuthenticated : boolean, 
     user?: IUserInfo,
     authAction : IAuthAction
 }
 
-interface IAuthContextProps extends RouteComponentProps {
+interface IAuthContextProps {
   children: ReactNode;
 }
 
 export const AppAuthContext = createContext<IAuthContextValues>({
   isAuthenticated: false,
   authAction: AuthActionBuilder.Default(),
-  appAuth: NullIonicAuthObject
+  appAuth: IonicAppAuth.buildInstance()
 });
 
 export const useAppAuth = () => useContext(AppAuthContext);
 
-const AppAuthProvider = ({ children, history } : IAuthContextProps) => {
+const AppAuthProvider : FC<IAuthContextProps> = ({ children } : IAuthContextProps) => {
 
-  const success = async (action : IAuthAction) => {
+  const success = (action : IAuthAction) => {
+    console.log("success")
+    console.log(JSON.stringify(action))
     setIsAuthenticated(true);
     setAuthAction(action);
-    setUser(await appAuth.getUserInfo<IUserInfo>());
-    if(action.action === AuthActions.SignInSuccess || action.action === AuthActions.AutoSignInSuccess){
-      history.replace('/home');
-    }
   }
 
   const failure = (action : IAuthAction) => {
+    console.log("failure")
+    console.log(JSON.stringify(action))
     setIsAuthenticated(false);
     setAuthAction(action);
     setUser(undefined);
-    history.replace('/landing');
   }
 
+  const [appAuth] = useState(IonicAppAuth.buildInstance(success,failure));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [appAuth] = useState<IIonicAuth>(IonicAppAuth.getInstance(success, failure));
   const [user, setUser] = useState<IUserInfo>();
   const [authAction, setAuthAction] = useState(AuthActionBuilder.Default());
 
+  const asycsc =  async () => appAuth.PageLoadAsync();
+
+  
+
   return (
+    (authAction.action !== AuthActions.Default) ?
         <AppAuthContext.Provider
           value={{
               appAuth,
@@ -58,8 +61,9 @@ const AppAuthProvider = ({ children, history } : IAuthContextProps) => {
         >
           {children}
         </AppAuthContext.Provider>
+        : <div>Awaiting Auth</div>
   );
   
 };
 
-export default withRouter(AppAuthProvider);
+export default AppAuthProvider;
