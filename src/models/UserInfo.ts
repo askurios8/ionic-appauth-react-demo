@@ -5,3 +5,11 @@ export interface IUserInfo {
     email: string;
     user_name: string;
 }
+
+
+export class DefaultUserInfo implements IUserInfo {
+    display_name: string = "";   
+    role: string= "";  
+    email: string= "";  
+    user_name: string= "";  
+}

@@ -2,7 +2,7 @@ import { Requestor } from "@openid/appauth";
 import { XhrSettings } from 'ionic-appauth/lib/cordova';
 import axios, { AxiosResponse } from 'axios';
 
-export class AxiosRequestor extends Requestor  {
+export class  AxiosRequestor extends Requestor  {
 
     
     public async xhr<T>(settings: XhrSettings){

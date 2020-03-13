@@ -1,14 +1,13 @@
-import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonPage, IonRouterOutlet } from '@ionic/react';
+import React, { useState } from 'react';
+import { Route, Redirect } from 'react-router-dom';
+import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 
-import Home from './pages/Home';
 import Landing from './pages/Landing';
-import AuthCallback from './pages/implicit/auth-callback';
-import EndSession from './pages/implicit/end-session';
-import AppAuthProvider from './components/ion-appauth/ion-appauth';
-import { PrivateRoute } from './components';
+import Home from './pages/Home';
+import LoginRedirect from './pages/Redirect';
+import EndRedirect from './pages/EndRedirect';
+import { AuthService } from './services/AuthService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,26 +27,29 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { PrivateRoute } from './routes/PrivateRoute';
 
-const App: React.FunctionComponent = () => 
-{
-  return ( 
-    <IonApp>
-      <IonReactRouter>
-        <IonPage>
-          <IonRouterOutlet>
-            <AppAuthProvider>
-              <Route exact path="/implicit/authcallback" component={AuthCallback} />
-              <Route exact path="/implicit/endsession" component={EndSession} />
-              <Route path="/landing" component={Landing} exact={true} />
-              <PrivateRoute path="/home" component={Home} exact={true} />
-              <Route exact path="/" render={() => <Redirect to="/home" />} />
-            </AppAuthProvider>
-          </IonRouterOutlet>
-        </IonPage>
-      </IonReactRouter>
-    </IonApp>
-  );
-}
+const App: React.FC = () => {
+
+  const [authComplete, setAuthComplete] = useState(false);
+
+  AuthService.Instance.startUpAsync().then(() => {
+    setAuthComplete(true);
+  });;
+
+  return (<IonApp>
+              {authComplete &&
+                        <IonReactRouter>
+                          <IonRouterOutlet>
+                            <Route path="/landing" component={Landing} exact />
+                            <PrivateRoute path="/home" component={Home} exact />
+                            <Route path="/loginredirect" component={LoginRedirect} exact />
+                            <Route path="/endredirect" component={EndRedirect} exact />
+                            <Route exact path="/" render={() => <Redirect to="/home" />} />
+                          </IonRouterOutlet>
+                        </IonReactRouter>
+              }
+          </IonApp>);
+};
 
 export default App;

@@ -1,5 +1,7 @@
 {
   "name": "ionic-appauth-react-demo",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "react"
 }
