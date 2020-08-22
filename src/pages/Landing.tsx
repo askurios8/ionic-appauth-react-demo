@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonPage } from '@ionic/react';
+import React, { useState } from 'react';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonPage, useIonViewWillEnter, useIonViewDidLeave } from '@ionic/react';
 
 import { ActionCard } from '../components';
-import { AuthService } from '../services/AuthService';
-import { AuthActions, AuthActionBuilder } from 'ionic-appauth';
+import { Auth } from '../services/AuthService';
+import { AuthActions, AuthActionBuilder, AuthObserver } from 'ionic-appauth';
 import { RouteComponentProps } from 'react-router';
 
 interface LandingPageProps extends RouteComponentProps {}
@@ -11,25 +11,27 @@ interface LandingPageProps extends RouteComponentProps {}
 const Landing : React.FC<LandingPageProps> = (props: LandingPageProps) => {
 
     const [action, setAction] = useState(AuthActionBuilder.Default);
+    
+    let observer: AuthObserver;
 
-    useEffect(() => {
-        const sub = AuthService.Instance.authObservable.subscribe((action) => {
-            console.log(JSON.stringify(action))
+    useIonViewWillEnter(() => {
+        Auth.Instance.loadTokenFromStorage();
+        observer = Auth.Instance.addActionListener((action) => {
             setAction(action)
-            if(action.action === AuthActions.SignInSuccess){
+            if(action.action === AuthActions.SignInSuccess || 
+                action.action === AuthActions.LoadTokenFromStorageSuccess){
               props.history.replace('home');
             }
-          });
+        });
+    });
 
-        return function cleanup() {
-            sub.unsubscribe();
-        };
-      
-    },[]);
-
+    useIonViewDidLeave(() => {
+        Auth.Instance.removeActionObserver(observer);
+    });
+ 
     function handleSignIn(e : any) {
         e.preventDefault();
-        AuthService.Instance.signIn();
+        Auth.Instance.signIn();
     }
 
     return (

@@ -1,73 +1,47 @@
-import { take, map, skipWhile } from 'rxjs/operators';
-import { StorageBackend } from '@openid/appauth';
 import { isPlatform } from '@ionic/react';
 import { Plugins } from '@capacitor/core';
-import { IonicAuth, Browser, DefaultBrowser, AuthActions, IAuthAction } from 'ionic-appauth';
-import { CapacitorBrowser, CapacitorStorage } from 'ionic-appauth/lib/capacitor';
-import { CordovaSecureStorage } from 'ionic-appauth/lib/cordova';
+import { ConsoleLogObserver, AuthService } from 'ionic-appauth';
+import { CapacitorBrowser, CapacitorSecureStorage } from 'ionic-appauth/lib/capacitor';
 
 import { AxiosRequestor } from './AxiosService';
 
 const { App } = Plugins;
 
-
-export class AuthService extends IonicAuth  {
-  authConfig = {
-    identity_client: 'examplemobile',
-    identity_server: 'https://localhost:44369',
-    redirect_url: isPlatform('capacitor') ? 'com.appauth.demo://callback' : window.location.origin + '/loginredirect',
-    end_session_redirect_url: isPlatform('capacitor') ?  'com.appauth.demo://endSession' : window.location.origin + '/endredirect',
-    scopes: 'openid offline_access',
-    usePkce: true
-  }
+export class Auth  {
 
   private static authService : AuthService | undefined;
 
-  constructor(
-    requestor = new AxiosRequestor(),
-    browser : Browser = (isPlatform('capacitor')) ? new CapacitorBrowser() : new DefaultBrowser(), 
-    storage : StorageBackend = (isPlatform('capacitor')) ?  new CordovaSecureStorage() : new CapacitorStorage()
-  ) {
-    super(browser, storage, requestor);
-  }
+  private static buildAuthInstance() {
+    const authService = new AuthService(new CapacitorBrowser(), new CapacitorSecureStorage(), new AxiosRequestor());
+    authService.authConfig = {
+      client_id: 'appauth',
+      server_host: 'http://localhost:5200',
+      redirect_url: isPlatform('capacitor') ? 'com.appauth.demo://callback' : window.location.origin + '/loginredirect',
+      end_session_redirect_url: isPlatform('capacitor') ?  'com.appauth.demo://endSession' : window.location.origin + '/endredirect',
+      scopes: 'openid offline_access',
+      pkce: true
+    }
 
-  public async startUpAsync() : Promise<void> {
     if (isPlatform('capacitor')) {
+      console.log("applistenercreated");
       App.addListener('appUrlOpen', (data: any) => {
+        console.log(data.url);
+        console.log(authService.authConfig.redirect_url);
         if (data.url !== undefined) {
-          this.handleCallback(data.url);
+          authService.handleCallback(data.url);
         }
       });
     }
 
-    return super.startUpAsync();
-  }
-
-  private handleCallback(callbackUrl: string): void {
-    if(this.authConfig){
-      if ((callbackUrl).indexOf(this.authConfig.redirect_url) === 0) {
-        this.AuthorizationCallBack(callbackUrl);
-      }
-  
-      if ((callbackUrl).indexOf(this.authConfig.end_session_redirect_url) === 0) {
-        this.EndSessionCallBack();
-      }
-    }
+    authService.addActionObserver(new ConsoleLogObserver());
+    return authService;
   }
 
   public static get Instance() : AuthService {
     if (!this.authService) {
-      this.authService = new AuthService();
+      this.authService = this.buildAuthInstance();
     }
 
     return this.authService;
-    
-  }
-
-
-  public isAuthenticated() : Promise<boolean> {
-    return this.authObservable.pipe(skipWhile((action : IAuthAction) => action.action === AuthActions.Default),
-                                    take(1),
-                                    map((action: IAuthAction) => action.tokenResponse !== undefined)).toPromise();
   }
 }
